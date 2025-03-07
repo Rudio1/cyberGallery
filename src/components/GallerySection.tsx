@@ -22,6 +22,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const [selectedImage, setSelectedImage] = React.useState<Artwork | null>(null);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const [crackingImage, setCrackingImage] = React.useState<Artwork | null>(null);
+  const [isClosing, setIsClosing] = React.useState(false);
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % artworks.length);
@@ -46,6 +47,14 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
     }, 700);
   };
 
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setSelectedImage(null);
+      setIsClosing(false);
+    }, 300); // Tempo da primeira etapa (fechar o card)
+  };
+
   // Renderiza a visualização em grade
   const renderGridView = () => (
     <motion.div
@@ -58,8 +67,9 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
           const isBreaking = crackingImage?.id === artwork.id;
           
           return (
-            <div
+            <motion.div
               key={artwork.id}
+              layoutId={`image-container-${artwork.id}`}
               className="relative group overflow-hidden rounded-lg bg-black/30 border border-cyan-500/20 backdrop-blur-sm"
             >
               <div 
@@ -67,10 +77,11 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                 onClick={() => !isAnimating && handleImageClick(artwork)}
               >
                 {/* Efeito de glitch na borda */}
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                 <div className="absolute inset-0 border border-cyan-500/30 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                 
-                <img
+                <motion.img
+                  layoutId={`image-${artwork.id}`}
                   src={artwork.image}
                   alt={artwork.title}
                   className="w-full h-full object-cover"
@@ -84,9 +95,9 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                   </div>
                 )}
                 <div 
-                  className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300"
                 >
-                  <div className="absolute bottom-0 left-0 right-0 p-6 backdrop-blur-sm">
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
                     <div className="relative overflow-hidden">
                       <h3 className="text-xl font-bold text-cyan-400 mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">
                         {artwork.title}
@@ -100,7 +111,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -154,19 +165,23 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl"
-        onClick={() => setSelectedImage(null)}
+        onClick={handleClose}
       >
         <motion.div
+          layoutId={`image-container-${selectedImage.id}`}
           className="relative max-w-7xl w-full mx-4"
           onClick={(e) => e.stopPropagation()}
           initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
+          animate={{ 
+            scale: isClosing ? 0.8 : 1, 
+            opacity: isClosing ? 0 : 1,
+            y: isClosing ? 20 : 0
+          }}
           transition={{ duration: 0.3 }}
         >
           <motion.button
             className="absolute -top-4 -right-4 z-10 w-12 h-12 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors flex items-center justify-center backdrop-blur-sm"
-            onClick={() => setSelectedImage(null)}
+            onClick={handleClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -175,22 +190,34 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
           </motion.button>
 
           <div className="relative rounded-lg overflow-hidden border border-cyan-500/20">
-            <img
+            <motion.img
+              layoutId={`image-${selectedImage.id}`}
               src={selectedImage.image}
               alt={selectedImage.title}
               className="w-full max-h-[80vh] object-contain bg-black/50"
+              animate={{
+                scale: isClosing ? 0.95 : 1,
+                opacity: isClosing ? 0.8 : 1
+              }}
+              transition={{ duration: 0.3 }}
             />
             
             <motion.div 
-              className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/80 to-transparent backdrop-blur-sm"
+              className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/80 to-transparent"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ 
+                opacity: isClosing ? 0 : 1, 
+                y: isClosing ? 20 : 0 
+              }}
               transition={{ delay: 0.2 }}
             >
               <motion.h2 
                 className="text-4xl font-bold text-cyan-400 mb-2 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]"
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{ 
+                  opacity: isClosing ? 0 : 1, 
+                  y: isClosing ? 10 : 0 
+                }}
                 transition={{ delay: 0.3 }}
               >
                 {selectedImage.title}
@@ -198,7 +225,10 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
               <motion.p 
                 className="text-cyan-300/80 mb-4"
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{ 
+                  opacity: isClosing ? 0 : 1, 
+                  y: isClosing ? 10 : 0 
+                }}
                 transition={{ delay: 0.4 }}
               >
                 by {selectedImage.artist}
@@ -206,7 +236,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
               <motion.p 
                 className="text-cyan-300/60"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                animate={{ opacity: isClosing ? 0 : 1 }}
                 transition={{ delay: 0.5 }}
               >
                 {selectedImage.description}
@@ -221,44 +251,62 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-black to-cyan-950/20">
-      {/* Controles de visualização */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className={`fixed top-4 right-4 z-50 transition-all duration-300 ${
-          viewMode === 'fullscreen' ? 'opacity-0 hover:opacity-100' : ''
-        }`}
-      >
-        <div className="flex space-x-2">
-          {(['grid', 'fullscreen'] as const).map((mode) => (
-            <motion.button
-              key={mode}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setViewMode(mode)}
-              className={`px-4 py-2 rounded-lg transition-all uppercase tracking-wider backdrop-blur-sm border text-sm ${
-                viewMode === mode
-                  ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-                  : 'bg-black/30 text-cyan-500/70 border-cyan-500/20 hover:border-cyan-500/40 hover:text-cyan-400'
-              }`}
-            >
-              {mode}
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Conteúdo da galeria baseado no modo de visualização */}
-      <AnimatePresence mode="wait">
-        {viewMode === 'grid' && renderGridView()}
-        {viewMode === 'fullscreen' && renderFullscreenView()}
+    <div className="relative min-h-screen bg-black">
+      <AnimatePresence>
+        {viewMode === 'grid' ? (
+          <motion.div
+            key="grid"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderGridView()}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="fullscreen"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderFullscreenView()}
+          </motion.div>
+        )}
       </AnimatePresence>
 
-      {/* Visualização detalhada da imagem */}
       <AnimatePresence>
         {selectedImage && renderDetailedView()}
       </AnimatePresence>
+
+      {/* View Mode Controls */}
+      <div className="fixed top-4 right-4 z-40 flex gap-2">
+        <motion.button
+          className={`px-4 py-2 rounded-lg border ${
+            viewMode === 'grid'
+              ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
+              : 'border-cyan-500/30 text-cyan-500/50 hover:text-cyan-400'
+          } transition-colors`}
+          onClick={() => setViewMode('grid')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          GRID
+        </motion.button>
+        <motion.button
+          className={`px-4 py-2 rounded-lg border ${
+            viewMode === 'fullscreen'
+              ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
+              : 'border-cyan-500/30 text-cyan-500/50 hover:text-cyan-400'
+          } transition-colors`}
+          onClick={() => setViewMode('fullscreen')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          FULLSCREEN
+        </motion.button>
+      </div>
     </div>
   );
 };
