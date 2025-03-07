@@ -32,6 +32,13 @@ const Gallery = () => {
 
   useEffect(() => {
     const bootSequence = async () => {
+      // Verifica se o usuário já viu a sequência de boot
+      const hasSeenBoot = localStorage.getItem('hasSeenBoot');
+      if (hasSeenBoot) {
+        setLoading(false);
+        return;
+      }
+
       const addLine = (text: string) => {
         setTerminalLines(prev => [...prev, text]);
       };
@@ -68,6 +75,9 @@ const Gallery = () => {
       
       setBootPhase('ready');
       setLoading(false);
+      
+      // Marca que o usuário já viu a sequência de boot
+      localStorage.setItem('hasSeenBoot', 'true');
     };
 
     bootSequence();

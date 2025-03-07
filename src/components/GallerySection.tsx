@@ -217,7 +217,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
         <div className="relative w-full h-full flex items-center justify-center">
           {/* Imagem anterior (pré-visualização) */}
           <motion.div
-            className="absolute left-0 w-1/3 h-full flex items-center justify-center"
+            className="absolute left-0 w-1/3 h-full hidden md:flex items-center justify-center"
             initial={{ opacity: 0, x: -300, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -300, scale: 0.8 }}
@@ -229,7 +229,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
             }}
           >
             <motion.div
-              className="relative w-[80%] h-[60%] rounded-lg overflow-hidden"
+              className="relative w-[50%] h-[40%] rounded-lg overflow-hidden"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             >
@@ -245,7 +245,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
           {/* Container de slides */}
           <motion.div
             key={currentIndex}
-            className="relative w-1/3 h-[80%] rounded-lg overflow-hidden"
+            className="relative w-full md:w-[80%] h-[95%] rounded-lg overflow-hidden"
             initial={{ opacity: 0, x: 300, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -300, scale: 0.8 }}
@@ -284,7 +284,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
 
           {/* Próxima imagem (pré-visualização) */}
           <motion.div
-            className="absolute right-0 w-1/3 h-full flex items-center justify-center"
+            className="absolute right-0 w-1/3 h-full hidden md:flex items-center justify-center"
             initial={{ opacity: 0, x: 300, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 300, scale: 0.8 }}
@@ -296,7 +296,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
             }}
           >
             <motion.div
-              className="relative w-[80%] h-[60%] rounded-lg overflow-hidden"
+              className="relative w-[50%] h-[40%] rounded-lg overflow-hidden"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             >
