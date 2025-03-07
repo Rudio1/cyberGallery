@@ -194,7 +194,6 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black"
-        onClick={handleClose}
       >
         <motion.div
           layoutId={`image-container-${selectedImage.id}`}
@@ -209,7 +208,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
           transition={{ duration: 1.5 }}
         >
           <motion.button
-            className="absolute -top-4 -right-4 z-10 w-12 h-12 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors flex items-center justify-center"
+            className="absolute -top-4 -right-4 z-[60] w-12 h-12 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors flex items-center justify-center"
             onClick={handleClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
