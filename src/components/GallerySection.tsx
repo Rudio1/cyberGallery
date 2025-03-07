@@ -37,8 +37,10 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const handleImageClick = (artwork: Artwork) => {
     if (isAnimating) return;
     
-    setSelectedImage(artwork);
     setShowScanner(true);
+    setShowClosingScanner(false);
+    setIsClosing(false);
+    setSelectedImage(artwork);
   };
 
   const handleClose = () => {
