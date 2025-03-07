@@ -1,6 +1,6 @@
 import React, { } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Move } from 'lucide-react';
 import CrackEffect from './CrackEffect';
 
 interface Artwork {
@@ -25,6 +25,24 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const [isClosing, setIsClosing] = React.useState(false);
   const [showScanner, setShowScanner] = React.useState(true);
   const [showClosingScanner, setShowClosingScanner] = React.useState(false);
+  const [isZoomed, setIsZoomed] = React.useState(false);
+  const [isPanning, setIsPanning] = React.useState(false);
+
+  // Estados para zoom e pan
+  const scale = useMotionValue(1);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  // Transformações suaves para zoom e pan
+  const smoothScale = useSpring(scale, { damping: 20, stiffness: 300 });
+  const smoothX = useSpring(x, { damping: 20, stiffness: 300 });
+  const smoothY = useSpring(y, { damping: 20, stiffness: 300 });
+
+  // Efeito parallax
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const parallaxX = useTransform(mouseX, [-100, 100], [-20, 20]);
+  const parallaxY = useTransform(mouseY, [-100, 100], [-20, 20]);
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % artworks.length);
@@ -54,6 +72,40 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
       setShowScanner(true);
       setIsAnimating(false);
     }, 1500);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isZoomed) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    mouseX.set(e.clientX - centerX);
+    mouseY.set(e.clientY - centerY);
+  };
+
+  const handleZoom = () => {
+    if (!isZoomed) {
+      scale.set(2);
+      setIsZoomed(true);
+    } else {
+      scale.set(1);
+      x.set(0);
+      y.set(0);
+      setIsZoomed(false);
+    }
+  };
+
+  const handlePan = (e: React.MouseEvent) => {
+    if (!isZoomed) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    x.set(e.clientX - centerX);
+    y.set(e.clientY - centerY);
   };
 
   // Renderiza a visualização em grade
@@ -152,36 +204,172 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   // Renderiza a visualização em tela cheia
   const renderFullscreenView = () => {
     const artwork = artworks[currentIndex];
+    const prevIndex = (currentIndex - 1 + artworks.length) % artworks.length;
+    const nextIndex = (currentIndex + 1) % artworks.length;
+
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="relative w-full h-screen bg-black overflow-hidden"
       >
-        <div className="absolute inset-0">
-          <img
-            src={artwork.image}
-            alt={artwork.title}
-            className="w-full h-full object-contain"
-          />
+        {/* Container principal com as três imagens */}
+        <div className="relative w-full h-full flex items-center justify-center">
+          {/* Imagem anterior (pré-visualização) */}
+          <motion.div
+            className="absolute left-0 w-1/3 h-full flex items-center justify-center"
+            initial={{ opacity: 0, x: -300, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -300, scale: 0.8 }}
+            transition={{ 
+              duration: 0.8,
+              type: "spring",
+              stiffness: 200,
+              damping: 25
+            }}
+          >
+            <motion.div
+              className="relative w-[80%] h-[60%] rounded-lg overflow-hidden"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
+              <img
+                src={artworks[prevIndex].image}
+                alt={artworks[prevIndex].title}
+                className="w-full h-full object-cover opacity-50"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+            </motion.div>
+          </motion.div>
+
+          {/* Container de slides */}
+          <motion.div
+            key={currentIndex}
+            className="relative w-1/3 h-[80%] rounded-lg overflow-hidden"
+            initial={{ opacity: 0, x: 300, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -300, scale: 0.8 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 500,
+              damping: 20,
+              mass: 0.8
+            }}
+          >
+            <motion.img
+              src={artwork.image}
+              alt={artwork.title}
+              className="w-full h-full object-contain"
+              style={{
+                scale: smoothScale,
+                x: smoothX,
+                y: smoothY,
+                rotateX: parallaxY,
+                rotateY: parallaxX
+              }}
+              drag={isZoomed}
+              dragConstraints={{
+                top: -100,
+                left: -100,
+                right: 100,
+                bottom: 100
+              }}
+              dragElastic={0.1}
+              onDragEnd={() => {
+                x.set(0);
+                y.set(0);
+              }}
+            />
+          </motion.div>
+
+          {/* Próxima imagem (pré-visualização) */}
+          <motion.div
+            className="absolute right-0 w-1/3 h-full flex items-center justify-center"
+            initial={{ opacity: 0, x: 300, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 300, scale: 0.8 }}
+            transition={{ 
+              duration: 0.8,
+              type: "spring",
+              stiffness: 200,
+              damping: 25
+            }}
+          >
+            <motion.div
+              className="relative w-[80%] h-[60%] rounded-lg overflow-hidden"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
+              <img
+                src={artworks[nextIndex].image}
+                alt={artworks[nextIndex].title}
+                className="w-full h-full object-cover opacity-50"
+              />
+              <div className="absolute inset-0 bg-gradient-to-l from-black/50 to-transparent" />
+            </motion.div>
+          </motion.div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/80 to-transparent">
-          <h2 className="text-4xl font-bold text-cyan-400 mb-2">{artwork.title}</h2>
-          <p className="text-gray-300 mb-2">by {artwork.artist}</p>
-          <p className="text-gray-400">{artwork.description}</p>
+
+        {/* Controles de zoom e pan */}
+        <div className="absolute bottom-4 right-4 flex gap-2">
+          <motion.button
+            className="p-2 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors"
+            onClick={handleZoom}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            {isZoomed ? <ZoomOut className="w-6 h-6" /> : <ZoomIn className="w-6 h-6" />}
+          </motion.button>
+          {isZoomed && (
+            <motion.button
+              className="p-2 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Move className="w-6 h-6" />
+            </motion.button>
+          )}
         </div>
-        <button
-          onClick={previousImage}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-400/70 hover:text-cyan-400 hover:scale-110 transition-all bg-black/20 backdrop-blur-sm p-2 rounded-full"
+
+        {/* Navegação com slide */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-between px-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
         >
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-        <button
-          onClick={nextImage}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-cyan-400/70 hover:text-cyan-400 hover:scale-110 transition-all bg-black/20 backdrop-blur-sm p-2 rounded-full"
+          <motion.button
+            className="p-2 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors"
+            onClick={previousImage}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <ChevronLeft className="w-8 h-8" />
+          </motion.button>
+          <motion.button
+            className="p-2 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors"
+            onClick={nextImage}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <ChevronRight className="w-8 h-8" />
+          </motion.button>
+        </motion.div>
+
+        {/* Informações da imagem */}
+        <motion.div 
+          className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/80 to-transparent"
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
-          <ChevronRight className="w-8 h-8" />
-        </button>
+          <h2 className="text-4xl font-bold text-cyan-400 mb-2 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+            {artwork.title}
+          </h2>
+          <p className="text-cyan-300/80 mb-2">by {artwork.artist}</p>
+          <p className="text-cyan-300/60">{artwork.description}</p>
+          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+        </motion.div>
       </motion.div>
     );
   };

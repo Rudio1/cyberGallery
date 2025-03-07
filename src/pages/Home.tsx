@@ -41,7 +41,7 @@ const Home = () => {
       {isMobile ? (
         <div className="w-full h-full flex items-center justify-center bg-black">
           <img 
-            src="/images/img1.jpg" 
+            src="/images/img1.png" 
             alt="Background" 
             className="w-full h-full object-contain"
           />

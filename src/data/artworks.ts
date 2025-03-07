@@ -11,7 +11,7 @@ export const artworks: Artwork[] = [
     id: 1,
     title: "Digital Consciousness",
     artist: "CyberArtist_2077",
-    image: "./images/img1.jpg",
+    image: "./images/img1.png",
     description: "A neural network visualization representing the convergence of human consciousness and artificial intelligence.",
   },
   {
@@ -53,7 +53,7 @@ export const artworks: Artwork[] = [
     id: 7,
     title: "Virtual Reality Escape",
     artist: "DataSculptor",
-    image: "./images/img7.jpg",
+    image: "./images/img7.png",
     description: "A glimpse into the future of virtual reality environments where digital and physical realities merge.",
   },
   {
