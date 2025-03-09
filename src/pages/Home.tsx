@@ -13,6 +13,8 @@ const Home = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
+    
+
     // Verificar inicialmente
     checkMobile();
 
@@ -39,22 +41,25 @@ const Home = () => {
   return (
     <div className="w-full h-screen overflow-hidden relative">
       {isMobile ? (
-        <div className="w-full h-full flex items-center justify-center bg-black">
-          <img 
-            src="/images/img1.png" 
-            alt="Background" 
-            className="w-full h-full object-contain"
-          />
-        </div>
-      ) : (
-        <GridDistortion
-          imageSrc="/images/img1.jpg"
-          grid={20}
-          mouse={0.3}
-          strength={0.4}
-          relaxation={0.8}
-        />
-      )}
+  <div className="w-full h-full flex items-center justify-center bg-black">
+    <img 
+      src="/images/img1.png" 
+      alt="Background" 
+      className="w-full h-full object-contain"
+    />
+  </div>
+) : (
+    <GridDistortion
+      imageSrc="https://picsum.photos/1920/1080?grayscale"
+      grid={20}
+      mouse={0.3}
+      strength={0.4}
+      relaxation={0.8}
+      className="grid-distortion"
+    />
+    
+)}
+
 
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <Dock 

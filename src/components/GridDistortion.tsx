@@ -225,6 +225,9 @@ const GridDistortion: React.FC<GridDistortionProps> = ({
       ref={containerRef}
       className={`w-full h-full overflow-hidden ${className} relative`}
     >
+      <div className="absolute inset-0 flex items-center justify-center text-[10rem] font-black select-none mix-blend-exclusion text-white z-10">
+        Gallery
+      </div>
     </div>
   );
 };
