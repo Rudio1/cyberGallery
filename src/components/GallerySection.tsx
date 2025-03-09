@@ -16,6 +16,11 @@ interface GallerySectionProps {
   setViewMode: (mode: 'grid' | 'fullscreen') => void;
 }
 
+interface ErrorDisplayProps {
+  artwork: any; // Substitua 'any' pelo tipo correto, se souber
+  isByFullscreen?: boolean; // Torna a prop opcional
+}
+
 const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, setViewMode }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [selectedImage, setSelectedImage] = React.useState<Artwork | null>(null);
@@ -29,6 +34,8 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const [isDecrypting, setIsDecrypting] = React.useState(false);
   const [decryptedText, setDecryptedText] = React.useState("");
   const [decryptProgress, setDecryptProgress] = React.useState(0);
+  const [recoveryAttempts, setRecoveryAttempts] = React.useState(3);
+  const [isRecovered, setIsRecovered] = React.useState(false);
 
   // Estados para zoom e pan
   const scale = useMotionValue(1);
@@ -117,10 +124,18 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   };
 
   const handleRetryClick = () => {
+    if (recoveryAttempts <= 0) return;
+
     setIsDecrypting(true);
     setDecryptProgress(0);
     let text = "";
-    const fullText = "Initializing recovery protocol...\nDecrypting image data...\nReconstructing visual matrix...\n[error]ERROR: Critical failure in recovery process\n[error]ERROR:Access denied: Security level insufficient\n[clearance]Required clearance level: RUDIO[/clearance]\n[warning]Attempt logged. Security notified.[/warning]";
+    const successChance = (4 - recoveryAttempts) * 10;
+    const isSuccessful = Math.random() * 100 <= successChance;
+    
+    const fullText = isSuccessful 
+      ? "Initializing recovery protocol...\nDecrypting image data...\nReconstructing visual matrix...\n[success]SUCCESS: Image data successfully restored![/success]\n[clearance]Access Level: GRANTED[/clearance]\n[warning]Whew... that was close! Thanks for saving this image— I was starting to panic![/warning]" 
+      : `Initializing recovery protocol...\nDecrypting image data...\nReconstructing visual matrix...\n[error]ERROR: Critical failure in recovery process\n[error]ERROR: Access denied: Security level insufficient\n[clearance]Required clearance level: RUDIO[/clearance]\n[warning]Attempt logged. Security notified`;
+    
     let index = 0;
 
     const decryptInterval = setInterval(() => {
@@ -132,19 +147,26 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
       } else {
         clearInterval(decryptInterval);
         setTimeout(() => {
+          if (isSuccessful) {
+            setIsRecovered(true);
+            setErrorImageId(null);
+          } else {
+            setRecoveryAttempts(prev => prev - 1);
+          }
           setIsDecrypting(false);
           setDecryptedText("");
           setDecryptProgress(0);
-        }, 700);
+        }, 2000);
       }
     }, 10);
   };
 
   // Componente de erro personalizado
-  const ErrorDisplay = ({ artwork }: { artwork: Artwork }) => (
-    <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-50">
-      <div className="relative mb-4 font-mono">
-        <motion.div
+  const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ artwork, isByFullscreen = false }) => {
+    return (
+      <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-50">
+        <div className="relative mb-4 font-mono">
+          <motion.div
           className="text-red-500 text-6xl relative"
           animate={{
             x: [-2, 0, 2, 0, -1, 1, 0],
@@ -197,101 +219,104 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
         </motion.div>
       </div>
       <h3 className="text-cyan-400 text-xl mb-4">Imagem Corrompida</h3>
-      <p className="text-cyan-300/80 mb-6">Falha ao carregar dados visuais</p>
+      <p className="text-cyan-300/80 mb-2">Falha ao carregar dados visuais</p>
       
       {isDecrypting ? (
-        <div className="w-full max-w-md">
-          <div className="relative mb-4">
-            <pre className="text-green-500 text-left text-sm font-mono whitespace-pre-wrap">
-              {decryptedText.split('\n').map((line, i) => {
-                let element;
-                if (line.startsWith('[error]')) {
-                  element = <span className="text-red-500">{line.replace('[error]', '').replace('[/error]', '')}</span>;
-                } else if (line.startsWith('[clearance]')) {
-                  element = <span className="text-cyan-400">{line.replace('[clearance]', '').replace('[/clearance]', '')}</span>;
-                } else if (line.startsWith('[warning]')) {
-                  element = <span className="text-yellow-500">{line.replace('[warning]', '').replace('[/warning]', '')}</span>;
-                } else {
-                  element = <span className="text-green-500">{line}</span>;
-                }
-                return (
-                  <React.Fragment key={i}>
-                    {element}
-                    {i < decryptedText.split('\n').length - 1 && <br />}
-                  </React.Fragment>
-                );
-              })}
-            </pre>
-            <motion.div
-              className="absolute top-0 left-0 w-2 h-full bg-green-500"
-              animate={{
-                opacity: [0, 1, 0],
-                transition: { duration: 0.5, repeat: Infinity }
-              }}
-            />
-          </div>
-          <div className="relative h-1 bg-green-500/20 rounded overflow-hidden">
-            <motion.div
-              className="absolute inset-y-0 left-0 bg-green-500"
-              style={{ width: `${decryptProgress}%` }}
-            />
-            {/* Efeito de glitch na barra de progresso */}
-            <motion.div
-              className="absolute inset-0 bg-green-500/50"
-              animate={{
-                opacity: [0, 0.5, 0],
-                x: ["-100%", "100%"],
-                transition: { duration: 1, repeat: Infinity }
-              }}
-            />
-            {decryptProgress >= 75 && (
-              <motion.div
-                className="absolute inset-0 bg-red-500"
-                initial={{ opacity: 0 }}
-                animate={{ 
-                  opacity: [0, 1, 0],
-                  transition: { duration: 0.2, repeat: Infinity }
-                }}
-              />
-            )}
-          </div>
-          {/* Matrix-style effect */}
-          <div className="absolute inset-0 pointer-events-none">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className={`absolute w-px h-8 bg-gradient-to-b ${
-                  decryptProgress >= 75 
-                    ? "from-red-500/0 via-red-500/50 to-red-500/0"
-                    : "from-green-500/0 via-green-500/50 to-green-500/0"
-                }`}
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `-${Math.random() * 100}%`
-                }}
-                animate={{
-                  y: ["0%", "200%"],
-                  transition: {
-                    duration: 1.5 + Math.random(),
-                    repeat: Infinity,
-                    ease: "linear"
-                  }
-                }}
-              />
-            ))}
-          </div>
+      <div className="w-full max-w-md">
+        <div className="relative mb-4">
+          <pre className="text-green-500 text-left text-sm font-mono whitespace-pre-wrap">
+            {decryptedText.split('\n').map((line, i) => {
+              let element;
+              if (line.startsWith('[error]')) {
+                element = <span className="text-red-500">{line.replace('[error]', '').replace('[/error]', '')}</span>;
+              } else if (line.startsWith('[clearance]')) {
+                element = <span className="text-cyan-400">{line.replace('[clearance]', '').replace('[/clearance]', '')}</span>;
+              } else if (line.startsWith('[warning]')) {
+                element = <span className="text-yellow-500">{line.replace('[warning]', '').replace('[/warning]', '')}</span>;
+              } else if (line.startsWith('[success]')) {
+                element = <span className="text-green-500">{line.replace('[success]', '').replace('[/success]', '')}</span>;
+              } else {
+                element = <span className="text-green-500">{line}</span>;
+              }
+              return (
+                <React.Fragment key={i}>
+                  {element}
+                  {i < decryptedText.split('\n').length - 1 && <br />}
+                </React.Fragment>
+              );
+            })}
+          </pre>
+          <motion.div
+            className="absolute top-0 left-0 w-2 h-full bg-green-500"
+            animate={{
+              opacity: [0, 1, 0],
+              transition: { duration: 0.5, repeat: Infinity }
+            }}
+          />
+        </div>
+        <div className="relative h-1 bg-green-500/20 rounded overflow-hidden">
+          <motion.div
+            className="absolute inset-y-0 left-0 bg-green-500"
+            style={{ width: `${decryptProgress}%` }}
+          />
+          {/* Efeito de glitch na barra de progresso */}
+          <motion.div
+            className="absolute inset-0 bg-green-500/50"
+            animate={{
+              opacity: [0, 0.5, 0],
+              x: ["-100%", "100%"],
+              transition: { duration: 1, repeat: Infinity }
+            }}
+          />
           {decryptProgress >= 75 && (
             <motion.div
-              className="absolute inset-0 bg-red-500/30"
+              className="absolute inset-0 bg-red-500"
               initial={{ opacity: 0 }}
-              animate={{
-                opacity: [0, 0.3, 0],
-                transition: { duration: 0.3, repeat: Infinity }
+              animate={{ 
+                opacity: [0, 1, 0],
+                transition: { duration: 0.2, repeat: Infinity }
               }}
             />
           )}
         </div>
-      ) : (
+        {/* Matrix-style effect */}
+        <div className="absolute inset-0 pointer-events-none">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className={`absolute w-px h-8 bg-gradient-to-b ${
+                decryptProgress >= 75 
+                  ? "from-red-500/0 via-red-500/50 to-red-500/0"
+                  : "from-green-500/0 via-green-500/50 to-green-500/0"
+              }`}
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `-${Math.random() * 100}%`
+              }}
+              animate={{
+                y: ["0%", "200%"],
+                transition: {
+                  duration: 1.5 + Math.random(),
+                  repeat: Infinity,
+                  ease: "linear"
+                }
+              }}
+            />
+          ))}
+        </div>
+        {decryptProgress >= 75 && (
+          <motion.div
+            className="absolute inset-0 bg-red-500/30"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 0.3, 0],
+              transition: { duration: 0.3, repeat: Infinity }
+            }}
+          />
+        )}
+      </div>
+    ) : (
+      !isByFullscreen && (
         <motion.button
           className="px-4 py-2 bg-cyan-500/20 border border-cyan-500 text-cyan-400 rounded-lg flex items-center gap-2 relative overflow-hidden group"
           onClick={(e) => {
@@ -310,9 +335,14 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
             transition={{ duration: 1 }}
           />
         </motion.button>
-      )}
+      )
+    )}
     </div>
   );
+}
+
+
+  
 
   // Renderiza a visualização em grade
   const renderGridView = () => (
@@ -462,8 +492,28 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
               <img
                 src={artworks[prevIndex].image}
                 alt={artworks[prevIndex].title}
-                className="w-full h-full object-cover opacity-50"
+                className={`w-full h-full object-cover opacity-50 ${errorImageId === artworks[prevIndex].id ? 'blur-md brightness-[0.3] contrast-125 hue-rotate-15' : ''}`}
               />
+              {errorImageId === artworks[prevIndex].id && (
+                <>
+                  <motion.div
+                    className="absolute inset-0 bg-red-500/20 mix-blend-overlay"
+                    animate={{
+                      opacity: [0, 0.7, 0],
+                      x: [-2, 2, -2],
+                      transition: { duration: 0.2, repeat: Infinity }
+                    }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 bg-cyan-500/20 mix-blend-overlay"
+                    animate={{
+                      opacity: [0, 0.7, 0],
+                      x: [2, -2, 2],
+                      transition: { duration: 0.3, repeat: Infinity }
+                    }}
+                  />
+                </>
+              )}
               <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
             </motion.div>
           </motion.div>
@@ -482,30 +532,60 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
               mass: 0.8
             }}
           >
-            <motion.img
-              src={artwork.image}
-              alt={artwork.title}
-              className="w-full h-full object-contain"
-              style={{
-                scale: smoothScale,
-                x: smoothX,
-                y: smoothY,
-                rotateX: parallaxY,
-                rotateY: parallaxX
-              }}
-              drag={isZoomed}
-              dragConstraints={{
-                top: -100,
-                left: -100,
-                right: 100,
-                bottom: 100
-              }}
-              dragElastic={0.1}
-              onDragEnd={() => {
-                x.set(0);
-                y.set(0);
-              }}
-            />
+            {errorImageId === artwork.id ? (
+              <div className="relative w-full h-full">
+                <motion.img
+                  src={artwork.image}
+                  alt={artwork.title}
+                  className="w-full h-full object-contain blur-md brightness-[0.3] contrast-125 hue-rotate-15"
+                />
+                {/* Efeito de glitch na imagem */}
+                <motion.div
+                  className="absolute inset-0 bg-red-500/20 mix-blend-overlay"
+                  animate={{
+                    opacity: [0, 0.7, 0],
+                    x: [-2, 2, -2],
+                    transition: { duration: 0.2, repeat: Infinity }
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 bg-cyan-500/20 mix-blend-overlay"
+                  animate={{
+                    opacity: [0, 0.7, 0],
+                    x: [2, -2, 2],
+                    transition: { duration: 0.3, repeat: Infinity }
+                  }}
+                />
+                <div className="absolute inset-0">
+                  <ErrorDisplay artwork={artwork} isByFullscreen={true} />
+                </div>
+              </div>
+            ) : (
+              <motion.img
+                src={artwork.image}
+                alt={artwork.title}
+                className="w-full h-full object-contain"
+                style={{
+                  scale: smoothScale,
+                  x: smoothX,
+                  y: smoothY,
+                  rotateX: parallaxY,
+                  rotateY: parallaxX
+                }}
+                drag={isZoomed}
+                dragConstraints={{
+                  top: -100,
+                  left: -100,
+                  right: 100,
+                  bottom: 100
+                }}
+                dragElastic={0.1}
+                onDragEnd={() => {
+                  x.set(0);
+                  y.set(0);
+                }}
+              />
+            )}
           </motion.div>
 
           {/* Próxima imagem (pré-visualização) */}
@@ -529,8 +609,28 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
               <img
                 src={artworks[nextIndex].image}
                 alt={artworks[nextIndex].title}
-                className="w-full h-full object-cover opacity-50"
+                className={`w-full h-full object-cover opacity-50 ${errorImageId === artworks[nextIndex].id ? 'blur-md brightness-[0.3] contrast-125 hue-rotate-15' : ''}`}
               />
+              {errorImageId === artworks[nextIndex].id && (
+                <>
+                  <motion.div
+                    className="absolute inset-0 bg-red-500/20 mix-blend-overlay"
+                    animate={{
+                      opacity: [0, 0.7, 0],
+                      x: [-2, 2, -2],
+                      transition: { duration: 0.2, repeat: Infinity }
+                    }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 bg-cyan-500/20 mix-blend-overlay"
+                    animate={{
+                      opacity: [0, 0.7, 0],
+                      x: [2, -2, 2],
+                      transition: { duration: 0.3, repeat: Infinity }
+                    }}
+                  />
+                </>
+              )}
               <div className="absolute inset-0 bg-gradient-to-l from-black/50 to-transparent" />
             </motion.div>
           </motion.div>
