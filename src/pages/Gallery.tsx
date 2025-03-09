@@ -45,45 +45,45 @@ const Gallery = () => {
       // Initial boot sequence
       setBootPhase('initializing');
       addLine('> INICIALIZANDO CYBER GALLERY OS v2.25.1');
-      await new Promise(r => setTimeout(r, 1000));
-      addLine('> CARREGANDO SISTEMAS PRINCIPAIS...');
       await new Promise(r => setTimeout(r, 800));
+      addLine('> CARREGANDO SISTEMAS PRINCIPAIS...');
+      await new Promise(r => setTimeout(r, 600));
       
       setBootPhase('warning');
       addLine('> ⚠️ AVISO ⚠️');
       addLine('> ⚠️ AVISO ⚠️');
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 600));
       addLine('> PROJETO PESSOAL - GALERIA PARTICULAR');
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 800));
       addLine('> ESTA É UMA GALERIA PESSOAL ONDE GUARDO IMAGENS QUE CONSIDEREI INTERESSANTES.');
-      await new Promise(r => setTimeout(r, 1000));
-      addLine('> TODAS AS IMAGENS SÃO PARTE DA MINHA COLEÇÃO PARTICULAR.');
-      await new Promise(r => setTimeout(r, 1000));
-      addLine('> ESTE É UM PROJETO INDIVIDUAL SEM FINS COMERCIAIS.');
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 1300));
+      addLine('> TODAS AS IMAGENS SÃO PARTE DA MINHA COLEÇÃO SALVAS');
+      await new Promise(r => setTimeout(r, 800));
 
       // Systems check
       setBootPhase('systems-check');
       addLine('> VERIFICANDO INTERFACE NEURAL... OK');
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 400));
       addLine('> CALIBRANDO DISPLAYS HOLOGRÁFICOS... OK');
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 400));
       addLine('> SINCRONIZANDO PROCESSADORES QUÂNTICOS... OK');
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 600));
 
       setBootPhase('security');
       addLine('> INICIALIZANDO PROTOCOLOS DE SEGURANÇA');
-      await new Promise(r => setTimeout(r, 1000));
-      addLine('> ESTABELECENDO CONEXÃO SEGURA... OK');
       await new Promise(r => setTimeout(r, 800));
+      addLine('> ERROR: PROTOCOLOS DE SEGURANÇA INATIVOS - 1 IMAGEM CORROMPIDA');
+      await new Promise(r => setTimeout(r, 1300));
+      addLine('> ESTABELECENDO CONEXÃO SEGURA... OK');
+      await new Promise(r => setTimeout(r, 600));
 
       setBootPhase('complete');
       addLine('> TODOS OS SISTEMAS OPERACIONAIS CARREGADOS');
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 100));
       addLine('> INICIANDO JORNADA NA GALERIA CIBERNÉTICA...');
-      await new Promise(r => setTimeout(r, 1500));
+      await new Promise(r => setTimeout(r, 750));
       addLine('> BEM-VINDO AO FUTURO DA ARTE DIGITAL :)!');
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 1000));
       
       setBootPhase('ready');
       setLoading(false);
@@ -128,11 +128,13 @@ const Gallery = () => {
                     animateOn="view"
                     className={line.includes('AVISO') ? 'text-yellow-500 font-bold' : 
                              line.includes('OK') ? 'text-green-500' : 
-                             line.includes('PROJETO PESSOAL') ? 'text-yellow-500' :
+                             line.includes('PROJETO PESSOAL') || line.includes('CONSIDEREI INTERESSANTES.') ? 'text-yellow-500' :
+                             line.includes('ERROR') ? 'text-red-500' :
                              'text-cyan-500'}
                     encryptedClassName={line.includes('AVISO') ? 'text-yellow-500/30' : 
                                       line.includes('OK') ? 'text-green-500/30' : 
-                                      line.includes('PROJETO PESSOAL') ? 'text-yellow-500/30' :
+                                      line.includes('PROJETO PESSOAL') || line.includes('CONSIDEREI INTERESSANTES.') ? 'text-yellow-500/30' :
+                                      line.includes('ERROR') ? 'text-red-500/30' :
                                       'text-cyan-500/30'}
                   />
                 </motion.div>

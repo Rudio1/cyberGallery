@@ -1,7 +1,6 @@
 import React, { } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Move } from 'lucide-react';
-import CrackEffect from './CrackEffect';
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Move, RefreshCcw } from 'lucide-react';
 
 interface Artwork {
   id: number;
@@ -21,12 +20,15 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [selectedImage, setSelectedImage] = React.useState<Artwork | null>(null);
   const [isAnimating, setIsAnimating] = React.useState(false);
-  const [crackingImage, setCrackingImage] = React.useState<Artwork | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
   const [showScanner, setShowScanner] = React.useState(true);
   const [showClosingScanner, setShowClosingScanner] = React.useState(false);
   const [isZoomed, setIsZoomed] = React.useState(false);
   const [isPanning, setIsPanning] = React.useState(false);
+  const [errorImageId, setErrorImageId] = React.useState<number | null>(null);
+  const [isDecrypting, setIsDecrypting] = React.useState(false);
+  const [decryptedText, setDecryptedText] = React.useState("");
+  const [decryptProgress, setDecryptProgress] = React.useState(0);
 
   // Estados para zoom e pan
   const scale = useMotionValue(1);
@@ -43,6 +45,12 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const mouseY = useMotionValue(0);
   const parallaxX = useTransform(mouseX, [-100, 100], [-20, 20]);
   const parallaxY = useTransform(mouseY, [-100, 100], [-20, 20]);
+
+  // Efeito para selecionar uma imagem aleatória para mostrar erro
+  React.useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * 2);
+    setErrorImageId(artworks[randomIndex]?.id || null);
+  }, [artworks]);
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % artworks.length);
@@ -108,95 +116,309 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
     y.set(e.clientY - centerY);
   };
 
+  const handleRetryClick = () => {
+    setIsDecrypting(true);
+    setDecryptProgress(0);
+    let text = "";
+    const fullText = "Initializing recovery protocol...\nDecrypting image data...\nReconstructing visual matrix...\n[error]ERROR: Critical failure in recovery process\n[error]ERROR:Access denied: Security level insufficient\n[clearance]Required clearance level: RUDIO[/clearance]\n[warning]Attempt logged. Security notified.[/warning]";
+    let index = 0;
+
+    const decryptInterval = setInterval(() => {
+      if (index < fullText.length) {
+        text += fullText[index];
+        setDecryptedText(text);
+        setDecryptProgress((index / fullText.length) * 100);
+        index++;
+      } else {
+        clearInterval(decryptInterval);
+        setTimeout(() => {
+          setIsDecrypting(false);
+          setDecryptedText("");
+          setDecryptProgress(0);
+        }, 700);
+      }
+    }, 25);
+  };
+
+  // Componente de erro personalizado
+  const ErrorDisplay = ({ artwork }: { artwork: Artwork }) => (
+    <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-50">
+      <div className="relative mb-4 font-mono">
+        <motion.div
+          className="text-red-500 text-6xl relative"
+          animate={{
+            x: [-2, 0, 2, 0, -1, 1, 0],
+            textShadow: [
+              "2px 2px #ff000030",
+              "-2px -2px #0ff",
+              "2px -2px #ff000030",
+              "-2px 2px #0ff",
+              "2px 2px #ff000030"
+            ]
+          }}
+          transition={{
+            duration: 0.5,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+        >
+          404
+        </motion.div>
+        {/* Camadas de glitch */}
+        <motion.div
+          className="absolute inset-0 text-6xl text-[#ff0000] opacity-50 select-none"
+          animate={{
+            x: [-3, 3, -2, 0, 2],
+            y: [1, -1, 0, 1, -1],
+            opacity: [0.5, 0.3, 0.5, 0.3, 0.5]
+          }}
+          transition={{
+            duration: 0.3,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+        >
+          404
+        </motion.div>
+        <motion.div
+          className="absolute inset-0 text-6xl text-[#00ffff] opacity-50 select-none"
+          animate={{
+            x: [3, -3, 2, 0, -2],
+            y: [-1, 1, 0, -1, 1],
+            opacity: [0.5, 0.3, 0.5, 0.3, 0.5]
+          }}
+          transition={{
+            duration: 0.4,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+        >
+          404
+        </motion.div>
+      </div>
+      <h3 className="text-cyan-400 text-xl mb-4">Imagem Corrompida</h3>
+      <p className="text-cyan-300/80 mb-6">Falha ao carregar dados visuais</p>
+      
+      {isDecrypting ? (
+        <div className="w-full max-w-md">
+          <div className="relative mb-4">
+            <pre className="text-green-500 text-left text-sm font-mono whitespace-pre-wrap">
+              {decryptedText.split('\n').map((line, i) => {
+                let element;
+                if (line.startsWith('[error]')) {
+                  element = <span className="text-red-500">{line.replace('[error]', '').replace('[/error]', '')}</span>;
+                } else if (line.startsWith('[clearance]')) {
+                  element = <span className="text-cyan-400">{line.replace('[clearance]', '').replace('[/clearance]', '')}</span>;
+                } else if (line.startsWith('[warning]')) {
+                  element = <span className="text-yellow-500">{line.replace('[warning]', '').replace('[/warning]', '')}</span>;
+                } else {
+                  element = <span className="text-green-500">{line}</span>;
+                }
+                return (
+                  <React.Fragment key={i}>
+                    {element}
+                    {i < decryptedText.split('\n').length - 1 && <br />}
+                  </React.Fragment>
+                );
+              })}
+            </pre>
+            <motion.div
+              className="absolute top-0 left-0 w-2 h-full bg-green-500"
+              animate={{
+                opacity: [0, 1, 0],
+                transition: { duration: 0.5, repeat: Infinity }
+              }}
+            />
+          </div>
+          <div className="relative h-1 bg-green-500/20 rounded overflow-hidden">
+            <motion.div
+              className="absolute inset-y-0 left-0 bg-green-500"
+              style={{ width: `${decryptProgress}%` }}
+            />
+            {/* Efeito de glitch na barra de progresso */}
+            <motion.div
+              className="absolute inset-0 bg-green-500/50"
+              animate={{
+                opacity: [0, 0.5, 0],
+                x: ["-100%", "100%"],
+                transition: { duration: 1, repeat: Infinity }
+              }}
+            />
+            {decryptProgress >= 75 && (
+              <motion.div
+                className="absolute inset-0 bg-red-500"
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: [0, 1, 0],
+                  transition: { duration: 0.2, repeat: Infinity }
+                }}
+              />
+            )}
+          </div>
+          {/* Matrix-style effect */}
+          <div className="absolute inset-0 pointer-events-none">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <motion.div
+                key={i}
+                className={`absolute w-px h-8 bg-gradient-to-b ${
+                  decryptProgress >= 75 
+                    ? "from-red-500/0 via-red-500/50 to-red-500/0"
+                    : "from-green-500/0 via-green-500/50 to-green-500/0"
+                }`}
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `-${Math.random() * 100}%`
+                }}
+                animate={{
+                  y: ["0%", "200%"],
+                  transition: {
+                    duration: 1.5 + Math.random(),
+                    repeat: Infinity,
+                    ease: "linear"
+                  }
+                }}
+              />
+            ))}
+          </div>
+          {decryptProgress >= 75 && (
+            <motion.div
+              className="absolute inset-0 bg-red-500/30"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 0.3, 0],
+                transition: { duration: 0.3, repeat: Infinity }
+              }}
+            />
+          )}
+        </div>
+      ) : (
+        <motion.button
+          className="px-4 py-2 bg-cyan-500/20 border border-cyan-500 text-cyan-400 rounded-lg flex items-center gap-2 relative overflow-hidden group"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRetryClick();
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <RefreshCcw className="w-4 h-4" />
+          Tentar Recuperar
+          <motion.div
+            className="absolute inset-0 bg-cyan-400/20"
+            initial={{ x: "-100%" }}
+            whileHover={{ x: "100%" }}
+            transition={{ duration: 1 }}
+          />
+        </motion.button>
+      )}
+    </div>
+  );
+
   // Renderiza a visualização em grade
   const renderGridView = () => (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-6 py-8"
+      className="container mx-auto px-6 py-8 relative"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {artworks.map((artwork, index) => {
-          const randomY = Math.random() * 200 - 100;
-          const randomRotate = Math.random() * 360 - 180;
-          const randomScale = 0.5 + Math.random() * 0.5;
-          
-          return (
-            <motion.div
-              key={artwork.id}
-              layoutId={`image-container-${artwork.id}`}
-              className="relative group overflow-hidden rounded-lg bg-black/30 border border-cyan-500/20"
-              initial={{ 
-                x: -200,
-                y: randomY,
-                rotate: randomRotate,
-                scale: randomScale,
-                opacity: 0
-              }}
-              animate={{ 
-                x: 0,
-                y: 0,
-                rotate: 0,
-                scale: 1,
-                opacity: 1
-              }}
-              transition={{ 
-                duration: 0.5,
-                delay: index * 0.1,
-                type: "spring",
-                stiffness: 100,
-                damping: 15,
-                mass: 0.6
-              }}
+        {artworks.map((artwork) => (
+          <motion.div
+            key={artwork.id}
+            layoutId={`image-container-${artwork.id}`}
+            className="relative group overflow-hidden rounded-lg bg-black/30 border border-cyan-500/20"
+          >
+            <div 
+              className="relative aspect-[4/3] cursor-pointer"
+              onClick={() => !isAnimating && !errorImageId && handleImageClick(artwork)}
             >
-              <div 
-                className="relative aspect-[4/3] cursor-pointer"
-                onClick={() => !isAnimating && handleImageClick(artwork)}
+              <motion.img
+                layoutId={`image-${artwork.id}`}
+                src={artwork.image}
+                alt={artwork.title}
+                className={`w-full h-full object-cover ${errorImageId === artwork.id ? 'blur-md brightness-[0.3] contrast-125 hue-rotate-15' : ''}`}
+                initial={{ clipPath: "inset(0 100% 0 0)", opacity: 0 }}
+                animate={{ clipPath: "inset(0 0% 0 0)", opacity: 1 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+              />
+              
+              {errorImageId === artwork.id && (
+                <>
+                  {/* Efeito de glitch na imagem */}
+                  <motion.div
+                    className="absolute inset-0 bg-red-500/20 mix-blend-overlay"
+                    animate={{
+                      opacity: [0, 0.7, 0],
+                      x: [-2, 2, -2],
+                      transition: { duration: 0.2, repeat: Infinity }
+                    }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 bg-cyan-500/20 mix-blend-overlay"
+                    animate={{
+                      opacity: [0, 0.7, 0],
+                      x: [2, -2, 2],
+                      transition: { duration: 0.3, repeat: Infinity }
+                    }}
+                  />
+                  <div className="absolute inset-0 z-40">
+                    <ErrorDisplay artwork={artwork} />
+                  </div>
+                </>
+              )}
+
+              {/* Scanner effect */}
+              <motion.div
+                className="absolute inset-0 z-50 pointer-events-none"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ delay: 1.5 }}
               >
-                <motion.img
-                  layoutId={`image-${artwork.id}`}
-                  src={artwork.image}
-                  alt={artwork.title}
-                  className="w-full h-full object-cover"
-                  initial={{ 
-                    scale: randomScale,
-                    rotate: randomRotate,
-                    x: -200
-                  }}
-                  animate={{ 
-                    scale: 1,
-                    rotate: 0,
-                    x: 0
-                  }}
-                  transition={{ 
-                    duration: 0.5,
-                    delay: index * 0.1,
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15,
-                    mass: 0.6
-                  }}
+                <motion.div
+                  className="absolute inset-y-0 w-[3px] bg-green-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
+                  initial={{ left: 0 }}
+                  animate={{ left: "100%" }}
+                  transition={{ duration: 1.5, ease: "easeInOut" }}
                 />
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300"
-                >
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="relative overflow-hidden">
-                      <h3 className="text-xl font-bold text-cyan-400 mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">
-                        {artwork.title}
-                      </h3>
-                      <p className="text-cyan-300/80">
-                        by {artwork.artist}
-                      </p>
-                      {/* Linha decorativa */}
-                      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
-                    </div>
+                {/* Glow effect */}
+                <motion.div
+                  className="absolute inset-y-0 w-[6px] bg-green-500/40 blur-[2px]"
+                  initial={{ left: 0 }}
+                  animate={{ left: "100%" }}
+                  transition={{ duration: 1.5, ease: "easeInOut" }}
+                />
+              </motion.div>
+
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
+              >
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="relative overflow-hidden">
+                    <h3 className="text-xl font-bold text-cyan-400 mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">
+                      {artwork.title}
+                    </h3>
+                    <p className="text-cyan-300/80">
+                      by {artwork.artist}
+                    </p>
+                    {/* Linha decorativa */}
+                    <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
                   </div>
                 </div>
               </div>
-            </motion.div>
-          );
-        })}
+
+              <style>{`
+                @keyframes revealImage {
+                  0% {
+                    clip-path: inset(0 100% 0 0);
+                  }
+                  100% {
+                    clip-path: inset(0 0 0 0);
+                  }
+                }
+              `}</style>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </motion.div>
   );
@@ -418,7 +640,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                   exit={{ opacity: 0 }}
                 >
                   <motion.div
-                    className="absolute inset-x-0 h-[3px] bg-cyan-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
+                    className="absolute inset-x-0 h-[3px] bg-green-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
                     initial={{ top: "100%" }}
                     animate={{ top: 0 }}
                     transition={{ duration: 1.5, ease: "easeInOut" }}
@@ -426,7 +648,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                   />
                   {/* Glow effect */}
                   <motion.div
-                    className="absolute inset-x-0 h-[6px] bg-cyan-500/40 blur-[2px]"
+                    className="absolute inset-x-0 h-[6px] bg-green-500/40 blur-[2px]"
                     initial={{ top: "100%" }}
                     animate={{ top: 0 }}
                     transition={{ duration: 1.5, ease: "easeInOut" }}
