@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface GridDistortionProps {
   grid?: number;
@@ -48,6 +49,7 @@ const GridDistortion: React.FC<GridDistortionProps> = ({
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const initialDataRef = useRef<Float32Array | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -87,6 +89,7 @@ const GridDistortion: React.FC<GridDistortionProps> = ({
       imageAspectRef.current = texture.image.width / texture.image.height;
       uniforms.uTexture.value = texture;
       handleResize();
+      setIsLoading(false);
     });
 
     const size = grid;
@@ -225,6 +228,34 @@ const GridDistortion: React.FC<GridDistortionProps> = ({
       ref={containerRef}
       className={`w-full h-full overflow-hidden ${className} relative`}
     >
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black z-50 flex items-center justify-center"
+          >
+            <div className="text-center space-y-4">
+              <motion.div
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-cyan-500 font-audiowide text-2xl"
+              >
+                WAIT FOR THIS
+              </motion.div>
+              <motion.div
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="text-cyan-400 font-audiowide"
+              >
+                I'M STILL LOADING...
+                :)
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="absolute inset-0 flex items-center justify-center text-[10rem] font-forta select-none mix-blend-exclusion text-white z-10">
         Gallery
       </div>
