@@ -45,45 +45,45 @@ const Gallery = () => {
       // Initial boot sequence
       setBootPhase('initializing');
       addLine('> INICIALIZANDO CYBER GALLERY OS v2.25.1');
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 300));
       addLine('> CARREGANDO SISTEMAS PRINCIPAIS...');
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 200));
       
       setBootPhase('warning');
       addLine('> ⚠️ AVISO ⚠️');
       addLine('> ⚠️ AVISO ⚠️');
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 200));
       addLine('> PROJETO PESSOAL - GALERIA PARTICULAR');
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 300));
       addLine('> ESTA É UMA GALERIA PESSOAL ONDE GUARDO IMAGENS QUE CONSIDEREI INTERESSANTES.');
-      await new Promise(r => setTimeout(r, 1300));
+      await new Promise(r => setTimeout(r, 400));
       addLine('> TODAS AS IMAGENS SÃO PARTE DA MINHA COLEÇÃO SALVAS');
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 300));
 
       // Systems check
       setBootPhase('systems-check');
       addLine('> VERIFICANDO INTERFACE NEURAL... OK');
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 200));
       addLine('> CALIBRANDO DISPLAYS HOLOGRÁFICOS... OK');
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 200));
       addLine('> SINCRONIZANDO PROCESSADORES QUÂNTICOS... OK');
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 200));
 
       setBootPhase('security');
       addLine('> INICIALIZANDO PROTOCOLOS DE SEGURANÇA');
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 300));
       addLine('> ERROR: PROTOCOLOS DE SEGURANÇA INATIVOS - 1 IMAGEM CORROMPIDA');
-      await new Promise(r => setTimeout(r, 1300));
+      await new Promise(r => setTimeout(r, 400));
       addLine('> ESTABELECENDO CONEXÃO SEGURA... OK');
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 200));
 
       setBootPhase('complete');
       addLine('> TODOS OS SISTEMAS OPERACIONAIS CARREGADOS');
       await new Promise(r => setTimeout(r, 100));
       addLine('> INICIANDO JORNADA NA GALERIA CIBERNÉTICA...');
-      await new Promise(r => setTimeout(r, 750));
+      await new Promise(r => setTimeout(r, 300));
       addLine('> BEM-VINDO AO FUTURO DA ARTE DIGITAL :)!');
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1500));
       
       setBootPhase('ready');
       setLoading(false);

@@ -21,7 +21,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const [selectedImage, setSelectedImage] = React.useState<Artwork | null>(null);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
-  const [showScanner, setShowScanner] = React.useState(true);
+  const [showScanner, setShowScanner] = React.useState(false);
   const [showClosingScanner, setShowClosingScanner] = React.useState(false);
   const [isZoomed, setIsZoomed] = React.useState(false);
   const [isPanning, setIsPanning] = React.useState(false);
@@ -62,7 +62,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
 
   const handleImageClick = (artwork: Artwork) => {
     if (isAnimating) return;
-    
+
     setShowScanner(true);
     setShowClosingScanner(false);
     setIsClosing(false);
@@ -79,7 +79,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
       setShowClosingScanner(false);
       setShowScanner(true);
       setIsAnimating(false);
-    }, 1500);
+    }, 800);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -137,7 +137,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
           setDecryptProgress(0);
         }, 700);
       }
-    }, 25);
+    }, 10);
   };
 
   // Componente de erro personalizado
@@ -330,7 +330,11 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
           >
             <div 
               className="relative aspect-[4/3] cursor-pointer"
-              onClick={() => !isAnimating && !errorImageId && handleImageClick(artwork)}
+              onClick={() => {
+                if (errorImageId === artwork.id) return;
+                if (isAnimating) return;
+                handleImageClick(artwork);
+              }}
             >
               <motion.img
                 layoutId={`image-${artwork.id}`}
@@ -617,7 +621,9 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
             opacity: isClosing ? 0 : 1,
             y: isClosing ? 20 : 0
           }}
-          transition={{ duration: 1.5 }}
+          transition={{ 
+            duration: 1.5,
+          }}
         >
           <motion.button
             className="absolute -top-4 -right-4 z-[60] w-12 h-12 rounded-full bg-black/50 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400/50 transition-colors flex items-center justify-center"
@@ -643,7 +649,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                     className="absolute inset-x-0 h-[3px] bg-green-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
                     initial={{ top: "100%" }}
                     animate={{ top: 0 }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    transition={{ duration: 1.8, ease: "easeInOut" }}
                     onAnimationComplete={() => setShowScanner(false)}
                   />
                   {/* Glow effect */}
@@ -651,7 +657,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                     className="absolute inset-x-0 h-[6px] bg-green-500/40 blur-[2px]"
                     initial={{ top: "100%" }}
                     animate={{ top: 0 }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    transition={{ duration: 1.8, ease: "easeInOut" }}
                   />
                 </motion.div>
               )}
@@ -670,14 +676,14 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                     className="absolute inset-x-0 h-[3px] bg-red-500 shadow-[0_0_30px_rgba(239,68,68,1)]"
                     initial={{ top: 0 }}
                     animate={{ top: "100%" }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
                   />
                   {/* Glow effect */}
                   <motion.div
                     className="absolute inset-x-0 h-[6px] bg-red-500/40 blur-[2px]"
                     initial={{ top: 0 }}
                     animate={{ top: "100%" }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
                   />
                 </motion.div>
               )}
@@ -696,8 +702,9 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                   animate={{ 
                     clipPath: isClosing ? "inset(100% 0 0 0)" : "inset(0 0 0 0)",
                     transition: {
-                      duration: 1.5,
-                      ease: "easeInOut"
+                      duration: isClosing ? 0.5 : 1.82,
+                      ease: "easeInOut",
+                      delay: 0 
                     }
                   }}
                 >
@@ -792,4 +799,4 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   );
 };
 
-export default GallerySection; 
+export default GallerySection;
