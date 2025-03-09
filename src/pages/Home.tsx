@@ -53,7 +53,7 @@ const Home = () => {
       imageSrc="https://picsum.photos/1920/1080?grayscale"
       grid={20}
       mouse={0.3}
-      strength={0.4}
+      strength={0.8}
       relaxation={0.8}
       className="grid-distortion"
     />
