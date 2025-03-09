@@ -8,7 +8,7 @@ import Dock from '../components/Dock';
 import { artworks } from '../data/artworks';
 
 type ViewMode = 'grid' | 'fullscreen';
-type BootPhase = 'initializing' | 'systems-check' | 'security' | 'complete' | 'ready';
+type BootPhase = 'initializing' | 'systems-check' | 'security' | 'complete' | 'ready' | 'warning';
 
 const Gallery = () => {
   const navigate = useNavigate();
@@ -32,8 +32,7 @@ const Gallery = () => {
 
   useEffect(() => {
     const bootSequence = async () => {
-      // Verifica se o usuário já viu a sequência de boot
-      const hasSeenBoot = localStorage.getItem('hasSeenBoot');
+      const hasSeenBoot = false;
       if (hasSeenBoot) {
         setLoading(false);
         return;
@@ -49,6 +48,19 @@ const Gallery = () => {
       await new Promise(r => setTimeout(r, 1000));
       addLine('> CARREGANDO SISTEMAS PRINCIPAIS...');
       await new Promise(r => setTimeout(r, 800));
+      
+      setBootPhase('warning');
+      addLine('> ⚠️ AVISO ⚠️');
+      addLine('> ⚠️ AVISO ⚠️');
+      await new Promise(r => setTimeout(r, 800));
+      addLine('> PROJETO PESSOAL - GALERIA PARTICULAR');
+      await new Promise(r => setTimeout(r, 1000));
+      addLine('> ESTA É UMA GALERIA PESSOAL ONDE GUARDO IMAGENS QUE CONSIDEREI INTERESSANTES.');
+      await new Promise(r => setTimeout(r, 1000));
+      addLine('> TODAS AS IMAGENS SÃO PARTE DA MINHA COLEÇÃO PARTICULAR.');
+      await new Promise(r => setTimeout(r, 1000));
+      addLine('> ESTE É UM PROJETO INDIVIDUAL SEM FINS COMERCIAIS.');
+      await new Promise(r => setTimeout(r, 2000));
 
       // Systems check
       setBootPhase('systems-check');
@@ -92,15 +104,15 @@ const Gallery = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black z-50 flex items-center justify-center"
           >
-            <div className="max-w-2xl w-full space-y-2 p-4 font-mono text-sm">
+            <div className="max-w-2xl w-full space-y-2 p-4 font-audiowide text-sm">
               <div className="text-xs mb-4">
                 <DecryptedText
                   text={`Status: ${bootPhase === 'complete' ? 'COMPLETO' : bootPhase.toUpperCase()}`}
                   speed={30}
                   sequential={true}
                   animateOn="view"
-                  className={bootPhase === 'complete' ? 'text-green-500' : 'text-cyan-500'}
-                  encryptedClassName={bootPhase === 'complete' ? 'text-green-500/30' : 'text-cyan-500/30'}
+                  className={bootPhase === 'warning' ? 'text-yellow-500' : bootPhase === 'complete' ? 'text-green-500' : 'text-cyan-500'}
+                  encryptedClassName={bootPhase === 'warning' ? 'text-yellow-500/30' : bootPhase === 'complete' ? 'text-green-500/30' : 'text-cyan-500/30'}
                 />
               </div>
               {terminalLines.map((line, index) => (
@@ -114,8 +126,14 @@ const Gallery = () => {
                     speed={30}
                     sequential={true}
                     animateOn="view"
-                    className={line.includes('OK') ? 'text-green-500' : 'text-cyan-500'}
-                    encryptedClassName={line.includes('OK') ? 'text-green-500/30' : 'text-cyan-500/30'}
+                    className={line.includes('AVISO') ? 'text-yellow-500 font-bold' : 
+                             line.includes('OK') ? 'text-green-500' : 
+                             line.includes('PROJETO PESSOAL') ? 'text-yellow-500' :
+                             'text-cyan-500'}
+                    encryptedClassName={line.includes('AVISO') ? 'text-yellow-500/30' : 
+                                      line.includes('OK') ? 'text-green-500/30' : 
+                                      line.includes('PROJETO PESSOAL') ? 'text-yellow-500/30' :
+                                      'text-cyan-500/30'}
                   />
                 </motion.div>
               ))}

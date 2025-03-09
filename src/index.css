@@ -1,6 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+
+@font-face {
+  font-family: 'Piximisa';
+  src: url('/fonts/Piximisa.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Forta';
+  src: url('/fonts/Forta.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Audiowide', cursive;
+  }
+}
 
 html, body {
   overflow-x: hidden;
