@@ -409,14 +409,14 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                 transition={{ delay: 1.5 }}
               >
                 <motion.div
-                  className="absolute inset-y-0 w-[3px] bg-green-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
+                  className="absolute inset-y-0 w-[3px] bg-cyan-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
                   initial={{ left: 0 }}
                   animate={{ left: "100%" }}
                   transition={{ duration: 1.5, ease: "easeInOut" }}
                 />
                 {/* Glow effect */}
                 <motion.div
-                  className="absolute inset-y-0 w-[6px] bg-green-500/40 blur-[2px]"
+                  className="absolute inset-y-0 w-[6px] bg-cyan-500/40 blur-[2px]"
                   initial={{ left: 0 }}
                   animate={{ left: "100%" }}
                   transition={{ duration: 1.5, ease: "easeInOut" }}
@@ -746,7 +746,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                   exit={{ opacity: 0 }}
                 >
                   <motion.div
-                    className="absolute inset-x-0 h-[3px] bg-green-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
+                    className="absolute inset-x-0 h-[3px] bg-cyan-500 shadow-[0_0_30px_rgba(34,197,94,1)]"
                     initial={{ top: "100%" }}
                     animate={{ top: 0 }}
                     transition={{ duration: 1.8, ease: "easeInOut" }}
@@ -754,7 +754,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                   />
                   {/* Glow effect */}
                   <motion.div
-                    className="absolute inset-x-0 h-[6px] bg-green-500/40 blur-[2px]"
+                    className="absolute inset-x-0 h-[6px] bg-cyan-500/40 blur-[2px]"
                     initial={{ top: "100%" }}
                     animate={{ top: 0 }}
                     transition={{ duration: 1.8, ease: "easeInOut" }}
