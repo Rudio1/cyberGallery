@@ -447,7 +447,28 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
           </motion.div>
         ))}
       </div>
+      <motion.div className="flex justify-between items-center mt-12">
+        <motion.div
+          className="text-cyan-400 text-lg font-semibold w-fit pl-8"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.5, delay: 0.5 }}
+        >
+           No more images... for now!
+        </motion.div>
+
+        <motion.div
+          className="text-cyan-400 text-lg font-semibold w-fit ml-auto pr-8"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.5, delay: 0.5 }}
+        >
+          I will update with more images soon :)
+        </motion.div>
+      </motion.div>
+
     </motion.div>
+    
   );
 
   // Renderiza a visualização em tela cheia

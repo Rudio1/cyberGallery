@@ -14,10 +14,13 @@ const Home = () => {
 
   const getRandomImage = () => {
     const imagesArray = [
-      '/images/grayscalefromhome1.jpg',
-      '/images/grayscalefromhome2.jpg',
-      '/images/grayscalefromhome3.jpg',
-      '/images/grayscalefromhome4.jpg',
+      '/images/imghome1.jpg',
+      '/images/imghome2.jpg',
+      '/images/imghome3.jpg',
+      '/images/imghome4.jpg',
+      '/images/imghome5.jpg',
+      '/images/imghome6.jpg',
+      '/images/imghome7.jpg'
     ];
     return imagesArray[Math.floor(Math.random() * imagesArray.length)];
   };
