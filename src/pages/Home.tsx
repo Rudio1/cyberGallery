@@ -16,11 +16,7 @@ const Home = () => {
     const imagesArray = [
       '/images/imghome1.jpg',
       '/images/imghome2.jpg',
-      '/images/imghome3.jpg',
-      '/images/imghome4.jpg',
-      '/images/imghome5.jpg',
-      '/images/imghome6.jpg',
-      '/images/imghome7.jpg'
+      '/images/imghome3.jpg'
     ];
     return imagesArray[Math.floor(Math.random() * imagesArray.length)];
   };
