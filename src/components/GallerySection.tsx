@@ -363,7 +363,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
                 layoutId={`image-${artwork.id}`}
                 src={artwork.image}
                 alt={artwork.title}
-                className={`w-full h-full object-cover ${errorImageId === artwork.id ? 'blur-md brightness-[0.3] contrast-125 hue-rotate-15' : ''}`}
+                className={`w-full h-full object-cover ${errorImageId === artwork.id ? 'blur-md brightness-[0.9] contrast-125 hue-rotate-15' : ''}`}
                 initial={{ clipPath: "inset(0 100% 0 0)", opacity: 0 }}
                 animate={{ clipPath: "inset(0 0% 0 0)", opacity: 1 }}
                 transition={{ duration: 1.5, ease: "easeInOut" }}

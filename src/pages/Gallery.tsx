@@ -32,7 +32,7 @@ const Gallery = () => {
 
   useEffect(() => {
     const bootSequence = async () => {
-      const hasSeenBoot = false;
+      const hasSeenBoot = true;
       if (hasSeenBoot) {
         setLoading(false);
         return;
