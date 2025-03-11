@@ -32,16 +32,18 @@ const Gallery = () => {
 
   useEffect(() => {
     const bootSequence = async () => {
-      const hasSeenBoot = true;
-      if (hasSeenBoot) {
+      const lastBootTime = localStorage.getItem('lastBootTime');
+      const now = Date.now();
+      
+      if (lastBootTime && now - Number(lastBootTime) < 5 * 60 * 1000) {
         setLoading(false);
         return;
       }
-
+  
       const addLine = (text: string) => {
         setTerminalLines(prev => [...prev, text]);
       };
-
+  
       // Initial boot sequence
       setBootPhase('initializing');
       addLine('> INICIALIZANDO CYBER GALLERY OS v2.25.1');
@@ -59,7 +61,7 @@ const Gallery = () => {
       await new Promise(r => setTimeout(r, 400));
       addLine('> TODAS AS IMAGENS SÃO PARTE DA MINHA COLEÇÃO SALVAS');
       await new Promise(r => setTimeout(r, 300));
-
+  
       // Systems check
       setBootPhase('systems-check');
       addLine('> VERIFICANDO INTERFACE NEURAL... OK');
@@ -68,7 +70,7 @@ const Gallery = () => {
       await new Promise(r => setTimeout(r, 200));
       addLine('> SINCRONIZANDO PROCESSADORES QUÂNTICOS... OK');
       await new Promise(r => setTimeout(r, 200));
-
+  
       setBootPhase('security');
       addLine('> INICIALIZANDO PROTOCOLOS DE SEGURANÇA');
       await new Promise(r => setTimeout(r, 300));
@@ -76,7 +78,7 @@ const Gallery = () => {
       await new Promise(r => setTimeout(r, 400));
       addLine('> ESTABELECENDO CONEXÃO SEGURA... OK');
       await new Promise(r => setTimeout(r, 200));
-
+  
       setBootPhase('complete');
       addLine('> TODOS OS SISTEMAS OPERACIONAIS CARREGADOS');
       await new Promise(r => setTimeout(r, 100));
@@ -88,13 +90,12 @@ const Gallery = () => {
       setBootPhase('ready');
       setLoading(false);
       
-      // Marca que o usuário já viu a sequência de boot
-      localStorage.setItem('hasSeenBoot', 'true');
+      localStorage.setItem('lastBootTime', String(now));
     };
-
+  
     bootSequence();
   }, []);
-
+  
   return (
     <div className="min-h-screen bg-black text-cyan-500">
       <AnimatePresence>
