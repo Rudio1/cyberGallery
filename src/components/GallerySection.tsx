@@ -17,8 +17,8 @@ interface GallerySectionProps {
 }
 
 interface ErrorDisplayProps {
-  artwork: any; // Substitua 'any' pelo tipo correto, se souber
-  isByFullscreen?: boolean; // Torna a prop opcional
+  artwork: any;
+  isByFullscreen?: boolean; 
 }
 
 const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, setViewMode }) => {
@@ -37,17 +37,14 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   const [recoveryAttempts, setRecoveryAttempts] = React.useState(3);
   const [isRecovered, setIsRecovered] = React.useState(false);
 
-  // Estados para zoom e pan
   const scale = useMotionValue(1);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   
-  // Transformações suaves para zoom e pan
   const smoothScale = useSpring(scale, { damping: 20, stiffness: 300 });
   const smoothX = useSpring(x, { damping: 20, stiffness: 300 });
   const smoothY = useSpring(y, { damping: 20, stiffness: 300 });
 
-  // Efeito parallax
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const parallaxX = useTransform(mouseX, [-100, 100], [-20, 20]);
@@ -129,7 +126,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
     setIsDecrypting(true);
     setDecryptProgress(0);
     let text = "";
-    const successChance = (4 - recoveryAttempts) * 10;
+    const successChance = (4 - recoveryAttempts) * 100;
     const isSuccessful = Math.random() * 100 <= successChance;
     
     const fullText = isSuccessful 
@@ -341,10 +338,6 @@ const GallerySection: React.FC<GallerySectionProps> = ({ artworks, viewMode, set
   );
 }
 
-
-  
-
-  // Renderiza a visualização em grade
   const renderGridView = () => (
     <motion.div
       initial={{ opacity: 0 }}

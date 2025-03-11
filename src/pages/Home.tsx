@@ -8,20 +8,31 @@ const Home = () => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
 
+  const [images, setImages] = useState({
+    greyscalefromhome: '',
+  });
+
+  const getRandomImage = () => {
+    const imagesArray = [
+      '/images/grayscalefromhome1.jpg',
+      '/images/grayscalefromhome2.jpg',
+      '/images/grayscalefromhome3.jpg',
+      '/images/grayscalefromhome4.jpg',
+    ];
+    return imagesArray[Math.floor(Math.random() * imagesArray.length)];
+  };
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    
-
-    // Verificar inicialmente
     checkMobile();
-
-    // Adicionar listener para mudanças de tamanho
     window.addEventListener('resize', checkMobile);
+    setImages({
+      greyscalefromhome: getRandomImage(),
+    });
 
-    // Cleanup
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -41,36 +52,34 @@ const Home = () => {
   return (
     <div className="w-full h-screen overflow-hidden relative">
       {isMobile ? (
-  <div className="w-full h-full flex items-center justify-center bg-black">
-    <img 
-      src="/images/img1.png" 
-      alt="Background" 
-      className="w-full h-full object-contain"
-    />
-  </div>
-) : (
-    <GridDistortion
-      imageSrc="https://picsum.photos/1920/1080?grayscale"
-      grid={20}
-      mouse={0.3}
-      strength={0.8}
-      relaxation={0.8}
-      className="grid-distortion"
-    />
-    
-)}
-
-
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <Dock 
-          items={dockItems}
-          panelHeight={68}
-          baseItemSize={50}
-          magnification={70}
-          className="bg-black/30 backdrop-blur-md"
+      <div className="w-full h-full flex items-center justify-center bg-black">
+        <img 
+          src="https://bucketstylegallery.s3.us-east-2.amazonaws.com/img1.png" 
+          alt="Background" 
+          className="w-full h-full object-contain"
         />
       </div>
+    ) : (
+      <GridDistortion
+        imageSrc={images.greyscalefromhome}
+        grid={20}
+        mouse={0.3}
+        strength={0.8}
+        relaxation={0.8}
+        className="grid-distortion"
+      />
+  )}
+
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      <Dock 
+        items={dockItems}
+        panelHeight={68}
+        baseItemSize={50}
+        magnification={70}
+        className="bg-black/30 backdrop-blur-md"
+      />
     </div>
+  </div>
   );
 };
 
