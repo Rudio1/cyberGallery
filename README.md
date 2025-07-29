@@ -7,7 +7,7 @@ A aplicação está hospedada em **AWS EC2** e utiliza **AWS S3** para armazenar
 ##  Acesse a aplicação
 
 Você pode acessar a galeria interativa no seguinte link:  
-[**Gallery**](https://newgallery.rudio1.com.br/)
+[**Gallery**](cybergallery1.netlify.app)
 
 ## Tecnologias Utilizadas
 
